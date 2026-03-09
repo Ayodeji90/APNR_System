@@ -63,6 +63,15 @@ _DEFAULTS = {
         "level": "INFO",
         "file": "data/anpr.log",
     },
+    "telegram": {
+        "enabled": False,
+        "bot_token": "",
+        "allowed_chat_ids": [],
+        "notify_on_allow": True,
+        "notify_on_deny": True,
+        "notify_on_unknown": True,
+        "send_image": True,
+    },
 }
 
 
@@ -133,6 +142,17 @@ class LoggingConfig:
 
 
 @dataclass
+class TelegramConfig:
+    enabled: bool = False
+    bot_token: str = ""
+    allowed_chat_ids: list = field(default_factory=list)
+    notify_on_allow: bool = True
+    notify_on_deny: bool = True
+    notify_on_unknown: bool = True
+    send_image: bool = True
+
+
+@dataclass
 class AppConfig:
     """Top-level application configuration."""
     camera: CameraConfig = field(default_factory=CameraConfig)
@@ -143,6 +163,7 @@ class AppConfig:
     paths: PathsConfig = field(default_factory=PathsConfig)
     web: WebConfig = field(default_factory=WebConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    telegram: TelegramConfig = field(default_factory=TelegramConfig)
 
     # Absolute base directory (set at load time)
     base_dir: str = ""
@@ -194,6 +215,7 @@ def load_config(config_path: Optional[str] = None) -> AppConfig:
         paths=PathsConfig(**merged["paths"]),
         web=WebConfig(**merged["web"]),
         logging=LoggingConfig(**merged["logging"]),
+        telegram=TelegramConfig(**merged["telegram"]),
         base_dir=base_dir,
     )
 

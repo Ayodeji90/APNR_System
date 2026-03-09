@@ -42,6 +42,15 @@ CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT DEFAULT ''
 );
+
+CREATE TABLE IF NOT EXISTS telegram_commands (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    chat_id   INTEGER NOT NULL,
+    command   TEXT NOT NULL,
+    args      TEXT DEFAULT '',
+    result    TEXT DEFAULT ''
+);
 """
 
 
@@ -203,6 +212,43 @@ class Database:
                 (f"{today}%",),
             ).fetchone()
             return row["cnt"]
+        finally:
+            conn.close()
+
+    # ── Telegram Command Audit Log ───────────────────────────
+    def log_telegram_command(
+        self,
+        chat_id: int,
+        command: str,
+        args: str = "",
+        result: str = "",
+    ) -> None:
+        """Record a Telegram command in the audit log."""
+        conn = self._connect()
+        try:
+            conn.execute(
+                """INSERT INTO telegram_commands
+                   (chat_id, command, args, result)
+                   VALUES (?, ?, ?, ?)""",
+                (int(chat_id), command, args, result),
+            )
+            conn.commit()
+            logger.debug(
+                "Telegram command logged: chat=%s cmd=%s args=%s",
+                chat_id, command, args,
+            )
+        finally:
+            conn.close()
+
+    def get_recent_telegram_commands(self, limit: int = 20) -> list:
+        """Return most recent Telegram commands, newest first."""
+        conn = self._connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM telegram_commands ORDER BY id DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+            return [dict(r) for r in rows]
         finally:
             conn.close()
 

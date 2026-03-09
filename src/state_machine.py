@@ -26,6 +26,12 @@ from src.ocr_engine import OcrEngine
 from src.decision_engine import DecisionEngine, Decision
 from src.actuator import ActuatorController
 
+# Optional — only imported if available
+try:
+    from src.telegram_bot import TelegramNotifier
+except ImportError:
+    TelegramNotifier = None  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,6 +64,7 @@ class ANPRStateMachine:
         ocr: OcrEngine,
         decision_engine: DecisionEngine,
         actuator: ActuatorController,
+        notifier=None,   # Optional TelegramNotifier
     ):
         self.cfg = cfg
         self.db = db
@@ -67,6 +74,7 @@ class ANPRStateMachine:
         self.ocr = ocr
         self.decision_engine = decision_engine
         self.actuator = actuator
+        self.notifier = notifier
 
         self.state = State.IDLE
         self.max_retries = cfg.detection.max_retries
@@ -198,6 +206,16 @@ class ANPRStateMachine:
                 "▶ ACCESS %s — barrier stays closed",
                 self._decision.value if self._decision else "UNKNOWN",
             )
+
+        # Telegram notification (non-blocking, fire-and-forget)
+        if self.notifier:
+            self.notifier.notify_event(
+                plate=self._plate_text,
+                decision=self._decision.value if self._decision else "UNKNOWN",
+                ocr_conf=self._ocr_conf,
+                detection_conf=self._detection_conf,
+            )
+
         return State.LOG
 
     # ── LOG ─────────────────────────────────────────────────

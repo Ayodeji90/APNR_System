@@ -5,3 +5,5 @@ Flask>=2.3
 PyYAML>=6.0
 numpy>=1.21
 pytest>=7.0
+python-telegram-bot>=21.0,<22.0
+

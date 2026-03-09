@@ -21,6 +21,8 @@ from src.ocr_engine import OcrEngine
 from src.decision_engine import DecisionEngine
 from src.actuator import ActuatorController
 from src.state_machine import ANPRStateMachine
+from src.telegram_bot import TelegramNotifier
+from src.command_handler import TelegramCommandHandler
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,7 @@ def main() -> None:
     logger.info("║    ANPR Gate System — Starting Up …      ║")
     logger.info("╚══════════════════════════════════════════╝")
 
-    # ── Initialise services ─────────────────────────────────
+    # ── Initialise core services ─────────────────────────────
     db = Database(cfg)
     sensor = UltrasonicSensor(cfg)
     camera = CameraService(cfg)
@@ -55,7 +57,11 @@ def main() -> None:
     decision_engine = DecisionEngine(cfg, db)
     actuator = ActuatorController(cfg)
 
-    # ── Build state machine ─────────────────────────────────
+    # ── Telegram layer (optional — graceful no-op if disabled) ─
+    notifier = TelegramNotifier(cfg)
+    cmd_handler = TelegramCommandHandler(cfg, db, actuator, camera, None)
+
+    # ── Build state machine ──────────────────────────────────
     sm = ANPRStateMachine(
         cfg=cfg,
         db=db,
@@ -65,17 +71,25 @@ def main() -> None:
         ocr=ocr,
         decision_engine=decision_engine,
         actuator=actuator,
+        notifier=notifier,
     )
+    # Wire state machine reference into command handler
+    cmd_handler._sm = sm
 
-    # ── Graceful shutdown handler ───────────────────────────
+    # ── Graceful shutdown handler ────────────────────────────
     def shutdown(signum, frame):
         logger.info("Received signal %s — shutting down …", signum)
         sm.stop()
+        cmd_handler.stop()
 
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    # ── Run ─────────────────────────────────────────────────
+    # ── Start Telegram command listener (daemon thread) ──────
+    cmd_handler.start()
+    notifier.notify_boot()   # Send "system online" message if Telegram enabled
+
+    # ── Run state machine (blocking) ────────────────────────
     try:
         sm.run()
     finally:
