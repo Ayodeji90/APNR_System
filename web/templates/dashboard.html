@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}ANPR Dashboard — Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Dashboard</h2>
+    <p class="subtitle">Real-time system overview</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">📊</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_events }}</span>
+            <span class="stat-label">Total Events</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">📅</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ today_events }}</span>
+            <span class="stat-label">Today</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">🚙</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ vehicle_count }}</span>
+            <span class="stat-label">Registered Vehicles</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-teal">⚡</div>
+        <div class="stat-info">
+            <span class="stat-value" id="system-status">Online</span>
+            <span class="stat-label">System Status</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Events -->
+<div class="section-card">
+    <div class="section-header">
+        <h3>Recent Events</h3>
+        <a href="{{ url_for('events') }}" class="btn btn-sm">View All →</a>
+    </div>
+
+    {% if events %}
+    <div class="events-table-wrapper">
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Plate</th>
+                    <th>Decision</th>
+                    <th>OCR Conf</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td class="td-time">{{ event.timestamp }}</td>
+                    <td class="td-plate"><code>{{ event.plate_text or '—' }}</code></td>
+                    <td>
+                        <span class="badge badge-{{ event.decision | lower }}">
+                            {{ event.decision }}
+                        </span>
+                    </td>
+                    <td>{{ "%.0f" | format(event.ocr_confidence) }}%</td>
+                    <td>
+                        {% if event.image_path %}
+                        <a href="{{ url_for('serve_image', filepath=event.image_path.replace('data/events/', '')) }}"
+                            target="_blank" class="btn btn-xs">View</a>
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No events recorded yet. The system is waiting for vehicles.</p>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-refresh status every 10s
+    setInterval(() => {
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('system-status').textContent =
+                    data.status === 'running' ? 'Online' : 'Offline';
+            })
+            .catch(() => {
+                document.getElementById('system-status').textContent = 'Offline';
+            });
+    }, 10000);
+</script>
+{% endblock %}

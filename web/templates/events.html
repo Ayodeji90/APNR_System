@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}ANPR Dashboard — Event Log{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Event Log</h2>
+    <p class="subtitle">Complete record of all plate recognition events</p>
+</div>
+
+<div class="section-card">
+    {% if events %}
+    <div class="events-table-wrapper">
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>Plate</th>
+                    <th>Decision</th>
+                    <th>OCR Conf</th>
+                    <th>Det Conf</th>
+                    <th>Note</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>#{{ event.id }}</td>
+                    <td class="td-time">{{ event.timestamp }}</td>
+                    <td class="td-plate"><code>{{ event.plate_text or '—' }}</code></td>
+                    <td>
+                        <span class="badge badge-{{ event.decision | lower }}">
+                            {{ event.decision }}
+                        </span>
+                    </td>
+                    <td>{{ "%.0f" | format(event.ocr_confidence) }}%</td>
+                    <td>{{ "%.2f" | format(event.detection_confidence) }}</td>
+                    <td class="td-note">{{ event.note or '—' }}</td>
+                    <td>
+                        {% if event.image_path %}
+                        <a href="{{ url_for('serve_image', filepath=event.image_path.replace('data/events/', '')) }}"
+                            target="_blank" class="btn btn-xs">View</a>
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('events', page=page-1) }}" class="btn btn-sm">← Previous</a>
+        {% endif %}
+        <span class="page-info">Page {{ page }}</span>
+        {% if has_more %}
+        <a href="{{ url_for('events', page=page+1) }}" class="btn btn-sm">Next →</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="empty-state">No events recorded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

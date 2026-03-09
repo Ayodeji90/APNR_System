@@ -1,0 +1,52 @@
+# ============================================================
+# ANPR Gate System — Default Configuration
+# ============================================================
+
+camera:
+  resolution_width: 640
+  resolution_height: 480
+  capture_count: 5            # Number of frames to capture per trigger
+  warmup_seconds: 2           # Camera warmup time on startup
+
+sensor:
+  trigger_pin: 23             # GPIO pin for HC-SR04 TRIG
+  echo_pin: 24                # GPIO pin for HC-SR04 ECHO
+  distance_threshold_cm: 50   # Vehicle present if distance < this
+  confirmation_readings: 3    # Consecutive readings to confirm presence
+  reading_interval_sec: 0.1   # Delay between readings
+
+actuator:
+  servo_pin: 18               # GPIO pin for servo signal (PWM)
+  relay_pin: 25               # GPIO pin for relay IN
+  servo_open_angle: 90        # Barrier open angle
+  servo_closed_angle: 0       # Barrier closed angle
+  open_duration_sec: 10       # Auto-close after this many seconds
+  use_servo: true             # Use servo for barrier
+  use_relay: false            # Use relay for gate motor
+
+detection:
+  min_detection_confidence: 0.5
+  min_ocr_confidence: 60      # Tesseract confidence (0-100)
+  max_retries: 3              # Retry capture/detection on failure
+  preprocessing_width: 800    # Resize target width for processing
+  plate_aspect_min: 2.0       # Minimum plate aspect ratio
+  plate_aspect_max: 6.0       # Maximum plate aspect ratio
+  min_plate_area: 1000        # Minimum contour area for plate candidate
+
+ocr:
+  engine: "tesseract"         # "tesseract" or "easyocr"
+  tesseract_psm: 7            # Page segmentation mode (single line)
+  char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+paths:
+  database: "data/db/anpr.db"
+  events_dir: "data/events"
+
+web:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+
+logging:
+  level: "INFO"               # DEBUG, INFO, WARNING, ERROR
+  file: "data/anpr.log"

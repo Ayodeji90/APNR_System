@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}ANPR Dashboard — Vehicle Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Vehicle Whitelist</h2>
+    <p class="subtitle">Manage authorized vehicles</p>
+</div>
+
+<!-- Add Vehicle Form -->
+<div class="section-card">
+    <h3>Add Vehicle</h3>
+    <form method="POST" action="{{ url_for('add_vehicle') }}" class="form-inline">
+        <div class="form-group">
+            <label for="plate_text">Plate Number</label>
+            <input type="text" id="plate_text" name="plate_text" placeholder="e.g. ABC1234" required
+                style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+            <label for="owner_name">Owner Name</label>
+            <input type="text" id="owner_name" name="owner_name" placeholder="Optional">
+        </div>
+        <div class="form-group">
+            <label for="access_level">Access Level</label>
+            <select id="access_level" name="access_level">
+                <option value="resident">Resident</option>
+                <option value="staff">Staff</option>
+                <option value="visitor">Visitor</option>
+                <option value="vip">VIP</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Vehicle</button>
+    </form>
+</div>
+
+<!-- Vehicle List -->
+<div class="section-card">
+    <div class="section-header">
+        <h3>Registered Vehicles ({{ vehicles | length }})</h3>
+    </div>
+
+    {% if vehicles %}
+    <div class="events-table-wrapper">
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>Plate</th>
+                    <th>Owner</th>
+                    <th>Access Level</th>
+                    <th>Added</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vehicles %}
+                <tr>
+                    <td class="td-plate"><code>{{ v.plate_text }}</code></td>
+                    <td>{{ v.owner_name or '—' }}</td>
+                    <td>
+                        <span class="badge badge-access-{{ v.access_level }}">
+                            {{ v.access_level }}
+                        </span>
+                    </td>
+                    <td class="td-time">{{ v.created_at or '—' }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('remove_vehicle') }}" style="display:inline;"
+                            onsubmit="return confirm('Remove {{ v.plate_text }}?')">
+                            <input type="hidden" name="plate_text" value="{{ v.plate_text }}">
+                            <button type="submit" class="btn btn-xs btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No vehicles registered. Add one above to get started.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+2026-03-08 19:27:41,928 [INFO] __main__: Starting ANPR Web Dashboard on 0.0.0.0:5000
+2026-03-08 19:27:41,939 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.186:5000
+2026-03-08 19:27:41,939 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-03-08 19:28:11,904 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:11] "GET / HTTP/1.1" 200 -
+2026-03-08 19:28:12,034 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:12] "GET /static/style.css HTTP/1.1" 200 -
+2026-03-08 19:28:13,457 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-03-08 19:28:20,025 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:20] "GET /vehicles HTTP/1.1" 200 -
+2026-03-08 19:28:20,292 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:20] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-03-08 19:28:28,505 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:28] "GET /events HTTP/1.1" 200 -
+2026-03-08 19:28:28,706 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:28:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-03-08 19:30:25,314 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:30:25] "GET /vehicles HTTP/1.1" 200 -
+2026-03-08 19:30:25,422 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:30:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-03-08 19:30:51,951 [INFO] src.database: Vehicle added/updated: ABJKFAWHFUIREKBE
+2026-03-08 19:30:51,964 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:30:51] "[32mPOST /vehicles/add HTTP/1.1[0m" 302 -
+2026-03-08 19:30:52,004 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:30:52] "GET /vehicles HTTP/1.1" 200 -
+2026-03-08 19:30:52,172 [INFO] werkzeug: 127.0.0.1 - - [08/Mar/2026 19:30:52] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
