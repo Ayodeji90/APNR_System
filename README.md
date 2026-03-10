@@ -13,6 +13,7 @@
 - **Event-driven state machine** (IDLE → TRIGGERED → CAPTURE → DETECT → OCR → DECIDE → ACTUATE → LOG)
 - **Retry logic** with enhanced preprocessing fallback on low-confidence OCR
 - **SQLite database** for event logs, vehicle whitelist, and settings
+- **Telegram Bot Integration** — real-time notifications with images, remote gate control, and whitelist management via chat
 - **Web dashboard** (Flask) — dark-themed, responsive
 - **Fail-safe** — barrier stays closed on crash; systemd auto-restart
 - **Simulator mode** — runs on any machine (no Pi hardware required for development)
@@ -463,6 +464,54 @@ Return to IDLE
 ```
 
 > ⚠ **Important:** Use a voltage divider (two resistors) on the HC-SR04 ECHO pin to step 5V down to 3.3V. This protects the Pi's GPIO.
+
+---
+
+---
+
+## Telegram Bot Integration
+
+The ANPR system includes a built-in Telegram bot that provides real-time notifications and allows you to control the gate remotely.
+
+### 1. Create a Telegram Bot
+1.  Open Telegram and search for **@BotFather**.
+2.  Send the command `/newbot`.
+3.  Follow the instructions to name your bot and give it a username.
+4.  BotFather will give you an **API Token**. Copy this; you'll need it for your configuration.
+5.  Search for your bot by its username and click **Start**.
+
+### 2. Get Your Chat ID
+The system only accepts commands from authorized Chat IDs.
+1.  Start a conversation with your bot.
+2.  Visit `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates` in your browser.
+3.  Look for the `"chat":{"id":123456789...}` section in the JSON response. That number is your Chat ID.
+
+### 3. Configuration
+Edit your `config.yaml` to enable the bot:
+
+```yaml
+telegram:
+  enabled: true
+  bot_token: "PASTE_YOUR_TOKEN_HERE"
+  allowed_chat_ids: [123456789]  # Add your Chat ID here
+  notify_on_allow: true
+  notify_on_deny: true
+  notify_on_unknown: true
+  send_image: true
+```
+
+### 4. Bot Commands
+| Command | Description |
+|---|---|
+| `/start` | Show help and command list |
+| `/status` | Current system state, barrier status, and uptime |
+| `/last_event` | Details of the most recent plate detection |
+| `/snapshot` | Capture a live frame from the camera and send it |
+| `/open_gate` | Manually raise the barrier |
+| `/close_gate` | Manually lower the barrier |
+| `/add_plate <ABC123>` | Add a plate to the whitelist |
+| `/remove_plate <ABC123>` | Remove a plate from the whitelist |
+| `/list_plates` | List all whitelisted vehicles |
 
 ---
 

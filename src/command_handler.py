@@ -3,17 +3,19 @@ ANPR System — Telegram Command Handler
 
 Starts a python-telegram-bot polling Application in a background
 daemon thread.  Receives inbound Telegram commands and maps them to
+daemon thread. Receives inbound Telegram commands and maps them to
 gate actions, whitelist management, and system queries.
 
 Security: every handler checks the sender's chat_id against the
-allowed list in config.  Unknown users receive a silent rejection.
+allowed list in config. Unknown users receive a silent rejection.
 """
 
 import asyncio
+import signal
 import logging
 import threading
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
 from src.config import AppConfig
 
@@ -31,10 +33,12 @@ try:
 except ImportError:
     # Stub types so method signatures in the class body parse at import time
     # even when python-telegram-bot is not installed.
-    Update = None          # type: ignore[assignment,misc]
-    ContextTypes = None    # type: ignore[assignment,misc]
-    Application = None     # type: ignore[assignment,misc]
-    CommandHandler = None  # type: ignore[assignment,misc]
+    class _Stub:
+        DEFAULT_TYPE = Any
+    Update = Any
+    ContextTypes = _Stub
+    Application = Any
+    CommandHandler = Any
     _HAS_TELEGRAM = False
 
 
